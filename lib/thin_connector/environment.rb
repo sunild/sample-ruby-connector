@@ -6,7 +6,7 @@ module ThinConnector
     REDIS_NAMESPACE = 'thinconnector'
     DEFAULT_ENV = 'development'
 
-    attr_reader :gnip_username, :gnip_password, :root, :redis_config, :log_level
+    attr_reader :gnip_username, :gnip_password, :root, :redis_config, :log_level, :redis_namespace
     @@_singleton__instance = nil
     @@_singleton_mutex = Mutex.new
 
@@ -41,6 +41,8 @@ module ThinConnector
       @gnip_url      = config['gnip_url']
       @root          = File.join File.expand_path(File.dirname __FILE__ ), '..', '..'
       @log_level     = config['log_level']
+      @redis_namespace = REDIS_NAMESPACE
+      load_redis_configuration
     end
 
     private
@@ -58,7 +60,8 @@ module ThinConnector
     end
 
     def load_redis_configuration
-
+       @redis_config = YAML.load_file(redis_configuration_file_path).symbolize_keys[env.to_sym]
     end
+
   end
 end
