@@ -10,7 +10,9 @@ module ThinConnector
       SECONDS_REST_BETWEEN_PAYLOADS = 1
       DEFAULT_MAX_TIMEOUT_IN_SECONDS = 60*5
 
-      @logger
+      @logger = ThinConnector::Logger.new
+
+      def initialize; end
 
       # Passes json strings to &block
       def start(&block)
@@ -22,16 +24,17 @@ module ThinConnector
           end
 
         rescue => e
-          @logger.info "Rescuing from error #{e}:#{e.message}"
+          puts e.to_s
+          @logger.info "Rescuing from error #{e}:#{e.message}" if logging?
           retry_count ||= 0
           retry_count += 1
 
           if should_try_reconnect retry_count
-            sleep seconds_between_reconnect(retry_count)
-            @logger.info "Retrying to connect stream for #{retry_count} time"
+            sleep seconds_between_reconnect?(retry_count)
+            @logger.info "Retrying to connect stream for #{retry_count} time" if logging?
             retry
           else
-            @logger.error "Not retrying to connect stream, probably timed out"
+            @logger.error "Not retrying to connect stream, probably timed out" if logging?
           end
         end
       end
@@ -75,6 +78,10 @@ module ThinConnector
       def should_try_reconnect?(attempt_number)
         raise 'Cannot retry negative times' if attempt_number < 0
         seconds_between_reconnect(attempt_number) < max_timeout
+      end
+
+      def logging?
+        false
       end
 
     end
