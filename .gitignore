@@ -2,3 +2,4 @@
 log/*
 config/application.yml
 config/redis.yml
+dump.rdb
