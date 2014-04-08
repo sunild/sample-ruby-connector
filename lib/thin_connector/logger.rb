@@ -3,6 +3,9 @@ require 'forwardable'
 
 module ThinConnector
 
+  # Simply wraps logger and makes it friendlier to use by providing log path declaration and level setting via integers
+  # or symbol/string
+
   class Logger
     include Forwardable
 
