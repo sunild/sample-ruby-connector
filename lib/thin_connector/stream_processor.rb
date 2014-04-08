@@ -3,7 +3,7 @@
 # it merely places the stream contents into a redis queue for processing
 # by other actors
 
-module ThinConector
+module ThinConnector
   class StreamProcessor
 
     REDIS_NAMESPACE = "stream_processor:raw"

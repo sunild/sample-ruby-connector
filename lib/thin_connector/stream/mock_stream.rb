@@ -1,6 +1,6 @@
 require 'json'
 require 'securerandom'
-require '../stream/stream_base'
+require_relative '../stream/stream_base'
 
 module ThinConnector
   module Stream
