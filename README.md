@@ -2,4 +2,4 @@
 
 - [ ] Add logging
 - [ ] Mock Stream
-- [ ] Add stream proccessor
+- [ ] Add stream processor
