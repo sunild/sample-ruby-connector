@@ -1,0 +1,1 @@
+Dir.glob("./thin_connector/**/**.rb"){ |file| require file unless File.directory?(file) }
