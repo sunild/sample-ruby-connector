@@ -11,7 +11,6 @@ module ThinConnector
     @@_singleton_mutex = Mutex.new
 
     def self.instance
-      #raise "No environment configuration passed into nil singleton" if !env && !@@_singleton__instance
       return @@_singleton__instance if @@_singleton__instance
       @@_singleton_mutex.synchronize {
         return @@_singleton__instance if @@_singleton__instance
