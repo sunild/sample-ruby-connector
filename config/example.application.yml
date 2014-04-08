@@ -1,0 +1,19 @@
+development:
+  gnip_username: krazy_for_cats@gmail.com
+  gnip_password: catscatscats
+  gnip_url: www.gnip.com/api
+
+staging:
+  gnip_username: krazy_for_cats@gmail.com
+  gnip_password: stagecats
+  gnip_url: www.gnip.com/api
+
+production:
+  gnip_username: krazy_for_cats@gmail.com
+  gnip_password: catsarecute
+  gnip_url: www.gnip.com/api
+
+test:
+  gnip_username: krazy_for_cats@gmail.com
+  gnip_password: donttestoncats
+  gnip_url: www.gnip.com/api
