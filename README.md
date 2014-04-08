@@ -2,5 +2,5 @@
 
 - [ ] Get environment state working
 - [ ] Add logging
-- [ ] Mock Stream
+- [x] Mock Stream
 - [ ] Add stream processor
