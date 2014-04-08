@@ -10,27 +10,28 @@ module ThinConnector
       SECONDS_REST_BETWEEN_PAYLOADS = 1
       DEFAULT_MAX_TIMEOUT_IN_SECONDS = 60*5
 
-      @logger = ThinConnector::Logger.new
-
-      def initialize; end
+      def initialize; @logger = ThinConnector::Logger.new end
 
       # Passes json strings to &block
       def start(&block)
         begin
-
+          puts "starting loop"
           while stream_is_open?
             yield json_data.to_json
-            sleep SECONDS_REST_BETWEEN_PAYLOADS if SECONDS_REST_BETWEEN_PAYLOADS
+            @logger.debug json_data.to_json
+            sleep_t = SECONDS_REST_BETWEEN_PAYLOADS if SECONDS_REST_BETWEEN_PAYLOADS
+            puts "Sleeping #{sleep_t/10000.0}"
+            sleep sleep_t/10000.0
           end
 
         rescue => e
-          puts e.to_s
+          puts "Error was #{e}"
           @logger.info "Rescuing from error #{e}:#{e.message}" if logging?
           retry_count ||= 0
           retry_count += 1
 
-          if should_try_reconnect retry_count
-            sleep seconds_between_reconnect?(retry_count)
+          if should_try_reconnect? retry_count
+            sleep seconds_between_reconnect(retry_count)
             @logger.info "Retrying to connect stream for #{retry_count} time" if logging?
             retry
           else
@@ -72,7 +73,7 @@ module ThinConnector
       end
 
       def max_timeout
-        ThinConnector::Environment.instance.stream_timeout || DEFAULT_MAX_TIMEOUT_IN_SECONDS
+        ThinConnector::Environment.instance.stream_timeout rescue DEFAULT_MAX_TIMEOUT_IN_SECONDS
       end
 
       def should_try_reconnect?(attempt_number)
