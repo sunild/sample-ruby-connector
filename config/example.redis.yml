@@ -1,11 +1,15 @@
 development:
-  host: localhost
+  host: "localhost"
   port: 6379
 
 staging:
-  host: redis-test.mykewldomain.biz
+  host: "redis-staging.mykewldomain.biz"
   port: 6379
 
 production:
-  host: redis.mykewldomain.biz
+  host: "redis.mykewldomain.biz"
+  port: 6379
+
+test:
+  host: "localhost"
   port: 6379
