@@ -1,5 +1,6 @@
 require 'logger'
 require 'forwardable'
+require 'fileutils'
 
 module ThinConnector
 
@@ -7,7 +8,7 @@ module ThinConnector
   # or symbol/string
 
   class Logger
-    include Forwardable
+    extend Forwardable
 
     LOG_LEVELS = {
         [:unknown, 0] => Object::Logger::UNKNOWN,
@@ -37,9 +38,9 @@ module ThinConnector
     private
 
     def logger_instance
+      create_log_file(log_file_path)
       instance = Object::Logger.new(log_file_path)
       log_level = get_log_level
-      puts "Set log level to #{log_level}"
       instance.level = log_level
       instance
     end
@@ -52,9 +53,9 @@ module ThinConnector
       env_log_level = ThinConnector::Environment.instance.log_level
 
       if [String, Symbol].include? env_log_level.class
-        log_levels.detect{ |level_arr, level| level_arr.first == env_log_level.to_sym }.to_a.flatten.first
+        log_levels.detect{ |level_arr, level| level_arr.first == env_log_level.to_sym }.to_a.flatten.last
       elsif env_log_level.is_a? Numeric
-        log_levels.detect{ |level_arr, level| level_arr.last == env_log_level }.to_a.flatten.first
+        log_levels.detect{ |level_arr, level| level_arr.last == env_log_level }.to_a.flatten.last
       else
         raise "Invalid log level #{env_log_level}"
       end
@@ -64,6 +65,16 @@ module ThinConnector
     def log_file_path
       log_file_name = "#{(ThinConnector::Environment.instance.env || DEVELOPMENT)}.log"
       File.join ThinConnector::Environment.instance.root, 'log', log_file_name
+    end
+
+    def create_log_file(file)
+      return if File.exists? file
+      create_log_dir file
+      File.open(file, 'w'){ |f| f << "\n" + Time.now.utc.to_s }
+    end
+
+    def create_log_dir(file)
+      FileUtils.mkdir_p File.dirname(file)
     end
 
   end
