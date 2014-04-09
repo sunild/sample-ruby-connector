@@ -4,8 +4,10 @@
 # by other actors
 
 require 'redis'
+
 module ThinConnector
   class StreamProcessor
+    include StreamDelegate
 
     REDIS_NAMESPACE = "stream_processor:raw"
 
@@ -35,5 +37,6 @@ module ThinConnector
     def stream; @stream; end
 
     def stream=(stream); @stream = stream; end
+
   end
 end
