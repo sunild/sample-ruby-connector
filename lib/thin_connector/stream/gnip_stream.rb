@@ -1,26 +1,40 @@
 require 'eventmachine'
 require 'em-http-request'
+require 'json'
+require_relative './stream.rb'
 
 module ThinConnector
   module Stream
 
     class GNIPStream < Stream::Base
+      include Stream
 
       EventMachine.threadpool_size = 3
 
-      attr_accessor :headers, :options, :url, :username, :password
+      attr_accessor :headers, :options, :url
+      attr_reader :username, :password
 
-      def initialize(url, headers={})
+      def initialize(url=nil, headers={})
+        @logger = ThinConnector::Logger.new
         @url = url
-        @headers = headers
+
+        # testing
+        @url ||= 'https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json'
+        @headers = headers.merge({ accept: 'application/json'})
+        @stream_reconnect_time = 1
       end
 
-      def start(&process_block)
-        connect
+      def start
+        if block_given?
+          @processor = Proc.new
+        else
+          @processor = Proc.new{ |data| puts data }
+        end
+        connect_stream
       end
 
       def stop
-        @stopped == true
+        EventMachine.stop
       end
 
       def on_message(&block)
@@ -37,42 +51,62 @@ module ThinConnector
 
       private
 
-      def connect
+      def connect_stream
         EM.run do
           return if stopped?
-          http = EM::HttpRequest.new(@url, :inactivity_timeout => 2**16, :connection_timeout => 2**16).get(:head => @headers)
+          http = EM::HttpRequest.new(@url, keep_alive: true,  inactivity_timeout: 2**16, connection_timeout: 100000).get(head: @headers)
           http.stream { |chunk| process_chunk(chunk) }
           http.callback {
             handle_connection_close(http)
-            EM.stop
+            reconnect
           }
           http.errback {
             handle_error(http)
-            EM.stop
+            reconnect
           }
+
         end
+      end
+
+      def reconnect
+        sleep @stream_reconnect_time
+        bump_reconnect_time
+        Stream.reset_reconnection_time if connect_stream
       end
 
       def process_chunk(chunk)
-        @prcessor.call chunk
-        @processor.complete_entries.each do |entry|
-          EM.defer { @on_message.call entry }
-        end
+        @logger.debug "\n\nprocess_chunk_called #{chunk}\n\n"
+        @processor.call chunk
+        # @processor.complete_entries.each do |entry|
+        #   EM.defer { @on_message.call entry }
+        # end
       end
 
       def handle_error(http_connection)
-        @on_error.call(http_connection)
+        debugger
+        @logger.error("Error with http connection " + http_connection.inspect)
       end
 
       def handle_connection_close(http_connection)
-        @on_connection_close.call(http_connection)
+        debugger
+        @logger.warn "HTTP connection closed #{http_connection.inspect}"
+        reconnect
       end
 
       def stopped?
-        @stopped.nil? || @stopped
+        @stopped
+      end
+
+      def username=(username)
+        @username = username
+        @headers.merge!({ username: username })
+      end
+
+      def password=(pw)
+        @password = pw
+        @headers.merge!({ password: pw })
       end
 
     end
-
   end
 end

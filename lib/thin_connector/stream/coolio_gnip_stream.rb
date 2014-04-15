@@ -6,8 +6,8 @@ module ThinConnector
     class CoolioGNIPStream < Coolio::HttpClient
 
       @reconnect_wait_time=0
-      @logger = Logger.new(STDOUT)
-      @logger.level = Logger::DEBUG
+      @logger = Object::Logger.new(STDOUT)
+      @logger.level = Object::Logger::DEBUG
 
       # Move into Environment!!!!
       @url = 'https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json'
@@ -71,7 +71,7 @@ module ThinConnector
 
       def connect_stream
         @run_loop = Coolio::Loop.default
-        @client = self.connect(url, 80, headers).attach @run_loop
+        @client = self.connect_stream(url, 80, headers).attach @run_loop
         @client.request('GET', '', :query => { :q => 'foobar' })
         @run_loop.run
       end

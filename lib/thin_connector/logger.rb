@@ -50,6 +50,7 @@ module ThinConnector
     end
 
     def get_log_level
+      debugger
       env_log_level = ThinConnector::Environment.instance.log_level
 
       if [String, Symbol].include? env_log_level.class
