@@ -16,11 +16,11 @@ module ThinConnector
       end
 
       def start(&process_block)
-
+        connect
       end
 
       def stop
-
+        @stopped == true
       end
 
       def on_message(&block)
@@ -39,6 +39,7 @@ module ThinConnector
 
       def connect
         EM.run do
+          return if stopped?
           http = EM::HttpRequest.new(@url, :inactivity_timeout => 2**16, :connection_timeout => 2**16).get(:head => @headers)
           http.stream { |chunk| process_chunk(chunk) }
           http.callback {
@@ -65,6 +66,10 @@ module ThinConnector
 
       def handle_connection_close(http_connection)
         @on_connection_close.call(http_connection)
+      end
+
+      def stopped?
+        @stopped.nil? || @stopped
       end
 
     end
