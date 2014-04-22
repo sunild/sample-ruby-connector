@@ -8,7 +8,8 @@ require_relative './thin_connector/stream/stream_base'
 require_relative './thin_connector/stream/mock_stream'
 require_relative './thin_connector/stream/gnip_stream'
 
-require_relative './thin_connector/models/tweet'
+# require_relative './active_record'
+# require_relative './thin_connector/models/tweet'
 
 require_relative './thin_connector/processor/stream_delegate'
 require_relative './thin_connector/processor/stream_processor'
