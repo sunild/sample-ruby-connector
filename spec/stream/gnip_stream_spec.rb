@@ -20,14 +20,12 @@ describe ThinConnector::Stream::GNIPStream do
 
     sleep 6
     stream.stop
-    t.kill
-    sleep 1 while t.alive?
+    t.join
 
-    puts "Last payload #{@data}"
     expect(@data).not_to be_nil
   end
 
-  it 'should handle the minimum required throughput' do
+  it 'should handle at least as much throughput as curl' do
     compare_time_seconds = 10
     acceptable_difference = 100
 
@@ -41,7 +39,7 @@ describe ThinConnector::Stream::GNIPStream do
         c.on_body{ |a| @base_payloads_recieved += 1; a.size }
       end
     end
-    puts 'Collecting payload from Curl'
+
     sleep compare_time_seconds
     compare_collection_thread.kill
     sleep 1 while compare_collection_thread.alive?
@@ -49,14 +47,12 @@ describe ThinConnector::Stream::GNIPStream do
 
     @count=0
     t = Thread.new{ stream.start{ |data| @count += 1 } }
-    puts 'Collecting payload from GnipStream'
     sleep compare_time_seconds
     stream.stop
-    t.kill
+    t.join
     sleep 1 while t.alive?
     abs_difference = (@count - @base_payloads_recieved).abs
 
-    puts "Collected from Curl: #{@base_payloads_recieved} Collected from Stream: #{@count}"
     expect(abs_difference < acceptable_difference).to be_true
   end
 end

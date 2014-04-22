@@ -14,25 +14,18 @@ describe ThinConnector::Processor::RedisStreamProcessor do
   let!(:stream)         { ThinConnector::Stream::GNIPStream.new(url, headers) }
   let(:redis_processor) { ThinConnector::Processor::RedisStreamProcessor.new stream }
   let(:redis)           { Redis.new ThinConnector::Environment.instance.redis_config }
-  let(:redis_queue)     { Environment.instance.redis_namespace + ":stream_processor:raw" }
+  let(:redis_queue)     { ThinConnector::Environment.instance.redis_namespace + ":stream_processor:raw" }
 
   it 'should put the paylaods into the appropriate Redis list' do
     redis.flushall
     processing_thread = Thread.new do
       redis_processor.start
     end
-
-    puts "Stuffing into Redis "
-    30.times do
-      print '.'
-      sleep 1
-    end
-    
     redis_processor.stop
     processing_thread.join
 
     number_of_payloads = redis.llen redis_queue
-    expect(number_of_payloads).to be > 0
+    expect(number_of_payloads).to be > 10
   end
 
 end
