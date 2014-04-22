@@ -21,6 +21,8 @@ describe ThinConnector::Processor::RedisStreamProcessor do
     processing_thread = Thread.new do
       redis_processor.start
     end
+
+    sleep 30
     redis_processor.stop
     processing_thread.join
 
