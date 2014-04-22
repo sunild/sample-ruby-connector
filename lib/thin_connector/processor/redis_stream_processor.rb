@@ -15,7 +15,9 @@ module ThinConnector
       attr_accessor :stream
 
       def initialize(the_stream)
+        @logger = ThinConnector::Logger.new
         @stream = the_stream
+        @logger.debug "attaching to redis with configs #{ThinConnector::Environment.instance.redis_config} and queue #{redis_queue}"
       end
 
       def start

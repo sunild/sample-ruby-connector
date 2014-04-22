@@ -1,13 +1,13 @@
 require 'eventmachine'
 require 'em-http-request'
 require 'json'
-require_relative './stream.rb'
+require_relative './stream_helper.rb'
 
 module ThinConnector
   module Stream
 
     class GNIPStream < Stream::Base
-      include Stream
+      include StreamHelper
 
       EventMachine.threadpool_size = 3
 
@@ -72,7 +72,7 @@ module ThinConnector
         return if stopped?
         sleep @stream_reconnect_time
         bump_reconnect_time
-        Stream.reset_reconnection_time if connect_stream
+        reset_reconnection_time if connect_stream
       end
 
       def process_chunk(chunk)

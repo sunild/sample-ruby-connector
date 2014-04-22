@@ -7,7 +7,7 @@ module ThinConnector
     DEFAULT_ENV = 'development'
     DEFAULT_LOG_LEVEL = :debug
 
-    attr_reader :gnip_username, :gnip_password, :root, :redis_config, :log_level, :redis_namespace
+    attr_reader :gnip_username, :gnip_password, :gnip_url, :root, :redis_config, :log_level, :redis_namespace
     @@_singleton__instance = nil
     @@_singleton_mutex = Mutex.new
 
@@ -16,7 +16,6 @@ module ThinConnector
       @@_singleton_mutex.synchronize {
         return @@_singleton__instance if @@_singleton__instance
         @@_singleton__instance = new
-        @@_singleton__instance.load_project_configuration
       }
       @@_singleton__instance
     end
@@ -34,6 +33,8 @@ module ThinConnector
       @env || DEFAULT_ENV
     end
 
+    private
+
     def load_project_configuration
       config = YAML.load_file(configuration_file_path)[env]
 
@@ -41,12 +42,9 @@ module ThinConnector
       @gnip_password = config['gnip_password']
       @gnip_url      = config['gnip_url']
       @root          = File.join File.expand_path(File.dirname __FILE__ ), '..', '..'
-      @log_level     = config['log_level'] ||
-      @redis_namespace = REDIS_NAMESPACE
+      @log_level     = config['log_level'] || DEFAULT_LOG_LEVEL
       load_redis_configuration
     end
-
-    private
 
     def initialize
       load_project_configuration
@@ -61,7 +59,8 @@ module ThinConnector
     end
 
     def load_redis_configuration
-       @redis_config = YAML.load_file(redis_configuration_file_path).symbolize_keys[env.to_sym]
+      @redis_namespace = ThinConnector::Environment::REDIS_NAMESPACE
+      @redis_config = YAML.load_file(redis_configuration_file_path).symbolize_keys[env.to_sym]
     end
 
   end
