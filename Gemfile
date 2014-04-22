@@ -4,7 +4,7 @@ gem 'redis'
 gem 'rest-client'
 gem 'eventmachine'
 gem 'em-http-request'
-gem 'cool.io'
+gem 'activerecord'
 
 group :development do
   gem 'debugger'
