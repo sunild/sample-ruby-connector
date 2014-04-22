@@ -9,7 +9,7 @@ module ThinConnector
   module Processor
 
     class RedisStreamProcessor
-      include StreamDelegate
+      include ThinConnector::Processor::StreamDelegate
 
       REDIS_NAMESPACE = "stream_processor:raw"
       attr_accessor :stream

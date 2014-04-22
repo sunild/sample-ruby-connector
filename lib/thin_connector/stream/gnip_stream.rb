@@ -7,7 +7,7 @@ module ThinConnector
   module Stream
 
     class GNIPStream < Stream::Base
-      include StreamHelper
+      include ThinConnector::Stream::StreamHelper
 
       EventMachine.threadpool_size = 3
 
@@ -72,7 +72,7 @@ module ThinConnector
         return if stopped?
         sleep @stream_reconnect_time
         bump_reconnect_time
-        reset_reconnection_time if connect_stream
+        reset_reconnect_time if connect_stream
       end
 
       def process_chunk(chunk)

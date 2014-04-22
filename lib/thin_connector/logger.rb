@@ -27,13 +27,13 @@ module ThinConnector
       @logger_instance = logger_instance
     end
 
-    def method_missing(method, *args, &block)
-      if log_levels.include? method.to_sym and should_log?(method.to_sym)
-        logger_instance.send method, args, block
-      end
-
-      super
-    end
+    # def method_missing(method, *args, &block)
+    #   if log_levels.include? method.to_sym and should_log?(method.to_sym)
+    #     logger_instance.send method, args, block
+    #   end
+    #
+    #   super
+    # end
 
     private
 
