@@ -69,6 +69,7 @@ module ThinConnector
       end
 
       def reconnect
+        return if stopped?
         sleep @stream_reconnect_time
         bump_reconnect_time
         Stream.reset_reconnection_time if connect_stream
@@ -77,18 +78,13 @@ module ThinConnector
       def process_chunk(chunk)
         @logger.debug "\n\nprocess_chunk_called #{chunk}\n\n"
         @processor.call chunk
-        # @processor.complete_entries.each do |entry|
-        #   EM.defer { @on_message.call entry }
-        # end
       end
 
       def handle_error(http_connection)
-        debugger
         @logger.error("Error with http connection " + http_connection.inspect)
       end
 
       def handle_connection_close(http_connection)
-        debugger
         @logger.warn "HTTP connection closed #{http_connection.inspect}"
         reconnect
       end
