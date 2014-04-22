@@ -38,11 +38,14 @@ module ThinConnector
     def load_project_configuration
       config = YAML.load_file(configuration_file_path)[env]
 
+      # https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json
       @gnip_username = config['gnip_username']
       @gnip_password = config['gnip_password']
       @gnip_url      = config['gnip_url']
       @root          = File.join File.expand_path(File.dirname __FILE__ ), '..', '..'
       @log_level     = config['log_level'] || DEFAULT_LOG_LEVEL
+      @gnip_account_name = extract_account_name_from_uri gnip_url
+      @gnip_stream_label = extract_stream_label_from_uri gnip_url
       load_redis_configuration
     end
 
@@ -61,6 +64,14 @@ module ThinConnector
     def load_redis_configuration
       @redis_namespace = ThinConnector::Environment::REDIS_NAMESPACE
       @redis_config = YAML.load_file(redis_configuration_file_path).symbolize_keys[env.to_sym]
+    end
+
+    def extract_account_name_from_uri(uri)
+      uri.match( /accounts\/[^\/]+/ )[0].split('/').last
+    end
+
+    def extract_stream_label_from_uri(uri)
+      uri.match( /[^\/]+\.json/ )[0].gsub '.json', ''
     end
 
   end

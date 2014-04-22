@@ -16,7 +16,7 @@ describe ThinConnector::Processor::RedisStreamProcessor do
   let(:redis)           { Redis.new ThinConnector::Environment.instance.redis_config }
   let(:redis_queue)     { ThinConnector::Environment.instance.redis_namespace + ":stream_processor:raw" }
 
-  it 'should put the paylaods into the appropriate Redis list' do
+  it 'should put the payloads into the appropriate Redis list' do
     redis.flushall
     processing_thread = Thread.new do
       redis_processor.start

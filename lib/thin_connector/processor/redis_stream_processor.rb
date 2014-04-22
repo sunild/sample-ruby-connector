@@ -4,6 +4,7 @@
 # by other actors
 
 require 'redis'
+require 'json'
 
 module ThinConnector
   module Processor
@@ -22,7 +23,11 @@ module ThinConnector
 
       def start
         stream.start do |object|
-          put_in_redis object
+          begin
+            put_in_redis object.to_json
+          rescue
+            @logger.error "Error putting into redis: \n\n#{object}"
+          end
         end
       end
 

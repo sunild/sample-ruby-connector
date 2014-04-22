@@ -34,7 +34,7 @@ module ThinConnector
       end
 
       def stop
-        EventMachine.stop
+        @stopped = true
       end
 
       def on_message(&block)
@@ -65,6 +65,11 @@ module ThinConnector
             reconnect
           }
 
+          EM.add_periodic_timer(3) do
+            if stopped?
+              EM.stop_event_loop
+            end
+          end
         end
       end
 
@@ -76,12 +81,16 @@ module ThinConnector
       end
 
       def process_chunk(chunk)
-        @logger.debug "\n\nprocess_chunk_called #{chunk}\n\n"
-        @processor.call chunk
+        begin
+          hash = JSON.parse chunk
+        rescue
+          @logger.warn "Unable to parse JSON: #{chunk}"
+        end
+        @processor.call hash
       end
 
       def handle_error(http_connection)
-        @logger.error("Error with http connection " + http_connection.inspect)
+        @logger.error('Error with http connection ' + http_connection.inspect)
       end
 
       def handle_connection_close(http_connection)
