@@ -9,4 +9,5 @@ require_relative './thin_connector/stream/mock_stream'
 require_relative './thin_connector/stream/gnip_stream'
 
 require_relative './thin_connector/stream_delegate'
-require_relative './thin_connector/stream_processor'
+require_relative './thin_connector/processor/stream_processor'
+require_relative './thin_connector/processor/redis_stream_processor'
