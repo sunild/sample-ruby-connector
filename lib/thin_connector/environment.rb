@@ -20,16 +20,10 @@ module ThinConnector
       @@_singleton__instance
     end
 
-
-    def env=(set_env)
-      if env
-        raise 'Env already set, cannot change mid execution'
-      else
-        @env = set_env
-      end
-    end
-
     def env
+      unless @env
+        @env = ENV['THIN_CONNECTOR_ENV']
+      end
       @env || DEFAULT_ENV
     end
 
@@ -39,11 +33,11 @@ module ThinConnector
       config = YAML.load_file(configuration_file_path)[env]
 
       # https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json
-      @gnip_username = config['gnip_username']
-      @gnip_password = config['gnip_password']
-      @gnip_url      = config['gnip_url']
-      @root          = File.join File.expand_path(File.dirname __FILE__ ), '..', '..'
-      @log_level     = config['log_level'] || DEFAULT_LOG_LEVEL
+      @gnip_username     = config['gnip_username']
+      @gnip_password     = config['gnip_password']
+      @gnip_url          = config['gnip_url']
+      @root              = File.join File.expand_path(File.dirname __FILE__ ), '..', '..'
+      @log_level         = config['log_level'] || DEFAULT_LOG_LEVEL
       @gnip_account_name = extract_account_name_from_uri gnip_url
       @gnip_stream_label = extract_stream_label_from_uri gnip_url
       load_redis_configuration

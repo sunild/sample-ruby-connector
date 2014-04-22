@@ -1,3 +1,5 @@
+# pass along methods to the stream
+
 module ThinConnector
   module Processor
     module StreamDelegate
