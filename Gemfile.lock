@@ -5,6 +5,7 @@ GEM
     columnize (0.3.6)
     cookiejar (0.3.2)
     cool.io (1.2.1)
+    curb (0.8.5)
     debugger (1.6.6)
       columnize (>= 0.3.1)
       debugger-linecache (~> 1.2.0)
@@ -40,6 +41,7 @@ PLATFORMS
 
 DEPENDENCIES
   cool.io
+  curb
   debugger
   em-http-request
   eventmachine
