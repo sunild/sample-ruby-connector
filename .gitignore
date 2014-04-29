@@ -4,3 +4,4 @@ config/application.yml
 config/redis.yml
 dump.rdb
 tags
+config/database.yml
