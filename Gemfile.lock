@@ -16,6 +16,7 @@ GEM
       tzinfo (~> 1.1)
     addressable (2.3.6)
     arel (5.0.1.20140414130214)
+    bson (1.10.0)
     builder (3.2.2)
     columnize (0.3.6)
     cookiejar (0.3.2)
@@ -41,6 +42,8 @@ GEM
     json (1.8.1)
     mime-types (2.2)
     minitest (5.3.3)
+    mongo (1.10.0)
+      bson (~> 1.10.0)
     mysql2 (0.3.15)
     redis (3.0.7)
     rest-client (1.6.7)
@@ -66,6 +69,7 @@ DEPENDENCIES
   debugger
   em-http-request
   eventmachine
+  mongo
   mysql2
   redis
   rest-client

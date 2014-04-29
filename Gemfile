@@ -6,6 +6,7 @@ gem 'eventmachine'
 gem 'em-http-request'
 gem 'activerecord'
 gem 'mysql2'
+gem 'mongo'
 
 group :development do
   gem 'debugger'
