@@ -1,5 +1,5 @@
 # Patch Hash to enable symbolization of keys, borrowed from the Rails project
-# https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/hash/keys.rb
+# https://github.com/rails/rails/blob/master/activesupport/src/active_support/core_ext/hash/keys.rb
 
 class Hash
   def transform_keys
