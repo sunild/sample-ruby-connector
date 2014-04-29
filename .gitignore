@@ -5,3 +5,4 @@ config/redis.yml
 dump.rdb
 tags
 config/database.yml
+config/mongo.yml
