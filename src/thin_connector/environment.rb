@@ -30,14 +30,14 @@ module ThinConnector
     private
 
     def load_project_configuration
-      config = YAML.load_file(configuration_file_path)[env]
+      config = YAML.load_file(configuration_file_path)[env.to_sym]
 
       # https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json
-      @gnip_username     = config['gnip_username']
-      @gnip_password     = config['gnip_password']
-      @gnip_url          = config['gnip_url']
+      @gnip_username     = config[:gnip_username].strip
+      @gnip_password     = config[:gnip_password].strip
+      @gnip_url          = config[:gnip_url].strip
       @root              = File.join File.expand_path(File.dirname __FILE__ ), '..', '..'
-      @log_level         = config['log_level'] || DEFAULT_LOG_LEVEL
+      @log_level         = config[:log_level].strip || DEFAULT_LOG_LEVEL
       @gnip_account_name = extract_account_name_from_uri gnip_url
       @gnip_stream_label = extract_stream_label_from_uri gnip_url
       load_redis_configuration
