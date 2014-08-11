@@ -23,6 +23,7 @@ def commands
   {
       redis: Proc.new{ redis_processor },
       stdout: Proc.new{ print_stream_processor },
+      mongo: Proc.new{ mongo_processor },
       configure: Proc.new{ configure },
       exit: Proc.new{ repl_exit },
       help: Proc.new{ puts help_msg }
@@ -47,12 +48,6 @@ def repl_exit
   puts 'See you next time! :)'
   exit 0
 end
-
-# development:
-#     gnip_username: "nisaacs@splickit.com"
-# gnip_password: "suckstwosuck"
-# gnip_url: "https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json"
-# log_level: 'debug'
 
 def configure
   config = {}
@@ -99,31 +94,23 @@ def write_out_config(config)
   end
 end
 
+def mongo_processor
+  stream = setup_stream
+  mongo_processor = ThinConnector::Processor::MongoStreamProcessor.new stream
+  run_processor mongo_processor
+  puts <<-eos
+    Mongo processor finished! Go check the
+    Mongo server 'tweets' collection to see what we brought in!
+  eos
+end
+
 def redis_processor
   stream = setup_stream
   redis_processor = ThinConnector::Processor::RedisStreamProcessor.new stream
   redis = Redis.new ThinConnector::Environment.instance.redis_config
   redis.flushall
 
-  processing_thread = Thread.new do
-    redis_processor.start
-  end
-
-  puts "Redis processor started. Press ENTER to stop\n\n"
-
-  while true
-    break if "\n"==gets
-  end
-  print 'Stopping'
-  stop_thread = Thread.new do
-    redis_processor.stop
-    processing_thread.join
-  end
-
-  while stop_thread.alive?
-    print '.'
-    sleep 1
-  end
+  run_processor(redis_processor)
 
   puts <<-eos
 Redis processor stopped. Head over to the redis-cli to see what we got!
@@ -134,6 +121,28 @@ hint, run:
 > KEYS *    # Command to show all keys
 > llen
   eos
+end
+
+def run_processor(processor)
+  processing_thread = Thread.new do
+    processor.start
+  end
+
+  puts "#{processor.class.to_s} processor started. Press ENTER to stop\n\n"
+
+  while true
+    break if "\n"==gets
+  end
+  print 'Stopping'
+  stop_thread = Thread.new do
+    processor.stop
+    processing_thread.join
+  end
+
+  while stop_thread.alive?
+    print '.'
+    sleep 1
+  end
 end
 
 def print_stream_processor
