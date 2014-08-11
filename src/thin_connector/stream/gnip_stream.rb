@@ -1,6 +1,7 @@
 require 'eventmachine'
 require 'em-http-request'
 require 'json'
+require 'yajl'
 require_relative './stream_helper.rb'
 
 module ThinConnector
@@ -11,9 +12,10 @@ module ThinConnector
 
       EventMachine.threadpool_size = 3
 
-      attr_accessor :headers, :options, :url
+      attr_accessor :headers, :options, :url, :string_buffer
       attr_reader :username, :password
 
+      @@buffer_mutex = Mutex.new
       def initialize(url=nil, headers={})
         @logger = ThinConnector::Logger.new
         @url = url
@@ -22,13 +24,17 @@ module ThinConnector
         @url ||= 'https://stream.gnip.com:443/accounts/isaacs/publishers/twitter/streams/track/prod.json'
         @headers = headers.merge({ accept: 'application/json'})
         @stream_reconnect_time = 1
+        @string_buffer=''
+
+        @parser = Yajl::Parser.new(:symbolize_keys => true)
+        @parser.on_parse_complete = method(:object_parsed)
       end
 
       def start
         if block_given?
           @processor = Proc.new
         else
-          @processor = Proc.new{ |data| puts data }
+          @processor = Proc.new{  }
         end
         connect_stream
       end
@@ -53,7 +59,6 @@ module ThinConnector
 
       def connect_stream
         EM.run do
-          return if stopped?
           http = EM::HttpRequest.new(@url, keep_alive: true,  inactivity_timeout: 2**16, connection_timeout: 100000).get(head: @headers)
           http.stream { |chunk| process_chunk(chunk) }
           http.callback {
@@ -74,23 +79,21 @@ module ThinConnector
       end
 
       def reconnect
+        @logger.error 'Reconnecting'
         return if stopped?
         sleep @stream_reconnect_time
         bump_reconnect_time
+        @logger.debug "Reconnect time bumped to: #{@stream_reconnect_time}"
         reset_reconnect_time if connect_stream
       end
 
       def process_chunk(chunk)
-        begin
-          hash = JSON.parse chunk
-        rescue
-          @logger.warn "Unable to parse JSON: #{chunk}"
-        end
-        @processor.call hash
+        @parser << chunk
       end
 
       def handle_error(http_connection)
         @logger.error('Error with http connection ' + http_connection.inspect)
+        reconnect
       end
 
       def handle_connection_close(http_connection)
@@ -110,6 +113,25 @@ module ThinConnector
       def password=(pw)
         @password = pw
         @headers.merge!({ password: pw })
+      end
+
+      def post_init
+        @parser = Yajl::Parser.new(:symbolize_keys => true)
+      end
+
+      def object_parsed(obj)
+        @processor.call obj
+      end
+
+      def connection_completed
+        # once a full JSON object has been parsed from the stream
+        # object_parsed will be called, and passed the constructed object
+        @parser.on_parse_complete = method(:object_parsed)
+      end
+
+      def receive_data(data)
+        # continue passing chunks
+        @parser << data
       end
 
     end

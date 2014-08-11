@@ -7,7 +7,7 @@ module ThinConnector
     DEFAULT_ENV = 'development'
     DEFAULT_LOG_LEVEL = :debug
 
-    attr_reader :gnip_username, :gnip_password, :gnip_url, :root, :redis_config, :log_level, :redis_namespace
+    attr_reader :gnip_username, :gnip_password, :gnip_url, :root, :redis_config, :redis_namespace, :mongo_config, :log_level
     @@_singleton__instance = nil
     @@_singleton_mutex = Mutex.new
 
@@ -41,6 +41,7 @@ module ThinConnector
       @gnip_account_name = extract_account_name_from_uri gnip_url
       @gnip_stream_label = extract_stream_label_from_uri gnip_url
       load_redis_configuration
+      load_mongo_configuration
     end
 
     def initialize
@@ -55,9 +56,17 @@ module ThinConnector
       File.join File.expand_path( File.dirname(__FILE__) ), '..', '..', 'config', 'redis.yml'
     end
 
+    def mongo_configuration_file_path
+      File.join File.expand_path( File.dirname(__FILE__) ), '..', '..', 'config', 'mongo.yml'
+    end
+
     def load_redis_configuration
       @redis_namespace = ThinConnector::Environment::REDIS_NAMESPACE
       @redis_config = YAML.load_file(redis_configuration_file_path).symbolize_keys[env.to_sym]
+    end
+
+    def load_mongo_configuration
+      @mongo_config = YAML.load_file(mongo_configuration_file_path).symbolize_keys[env.to_sym].symbolize_keys
     end
 
     def extract_account_name_from_uri(uri)

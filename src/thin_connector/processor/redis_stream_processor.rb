@@ -44,8 +44,8 @@ module ThinConnector
       def redis_queue; Environment.instance.redis_namespace + ":#{REDIS_NAMESPACE}"; end
 
       def redis_client
-        @_redis_client ||= Redis.new ThinConnector::Environment.instance.redis_config
-        @_redis_client
+        @_mongo_client ||= Redis.new ThinConnector::Environment.instance.redis_config
+        @_mongo_client
       end
 
     end
