@@ -7,6 +7,7 @@ gem 'em-http-request'
 gem 'activerecord'
 gem 'mysql2'
 gem 'mongo'
+gem 'yajl-ruby', require: 'yajl'
 
 group :development do
   gem 'debugger'

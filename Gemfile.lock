@@ -59,6 +59,7 @@ GEM
     thread_safe (0.3.3)
     tzinfo (1.1.0)
       thread_safe (~> 0.1)
+    yajl-ruby (1.2.1)
 
 PLATFORMS
   ruby
@@ -74,3 +75,4 @@ DEPENDENCIES
   redis
   rest-client
   rspec
+  yajl-ruby
