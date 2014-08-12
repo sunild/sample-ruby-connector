@@ -34,7 +34,7 @@ module ThinConnector
         if block_given?
           @processor = Proc.new
         else
-          @processor = Proc.new{  }
+          @processor = Proc.new{ |data| puts data }
         end
         connect_stream
       end

@@ -14,6 +14,7 @@ def repl
 end
 
 def handle_command(cmd)
+  return if cmd =~ /^(\n|\r)/
   strip_cmd = (cmd.downcase.gsub /\W/, '').to_sym
   block = commands[strip_cmd]
   block.call if block
@@ -104,6 +105,12 @@ def mongo_processor
   eos
 end
 
+def print_stream_processor
+  stream = setup_stream
+  run_processor stream
+  puts "\n\n\nWhew! That was a lot of JSON!"
+end
+
 def redis_processor
   stream = setup_stream
   redis_processor = ThinConnector::Processor::RedisStreamProcessor.new stream
@@ -145,9 +152,6 @@ def run_processor(processor)
   end
 end
 
-def print_stream_processor
-
-end
 
 def setup_stream
   environment = ThinConnector::Environment.instance
