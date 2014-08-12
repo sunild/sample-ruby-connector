@@ -1,6 +1,7 @@
 #TODO
 
-- [ ] Get environment state working
-- [ ] Add logging
+- [x] Get environment state working
+- [x] Add logging
 - [x] Mock Stream
-- [ ] Add stream processor
+- [x] Add stream processor
+- [ ] Make README awesome!
