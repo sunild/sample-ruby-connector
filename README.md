@@ -1,13 +1,3 @@
-#TODO
-
-- [x] Get environment state working
-- [x] Add logging
-- [x] Mock Stream
-- [x] Add stream processor
-- [x] Make README awesome!
-- [x] Fix empty configuration on first run
-- [x] Default redis/mongo yml files
-
 #Welcome to the Ruby Thin Connector!
 This is a sample app which connects to the Gnip set of streaming APIs in Ruby. The application is broken down into three basic elements:
  - A ```GnipStream``` which connects to the HTTP endpoint and buffers the streaming JSON
@@ -17,7 +7,7 @@ Some key notes about this design are as follows:
  1. Modularity: We try to do our best to keep clean separation between different logical pieces of the app. Logical blocks include:
     - Incoming stream handling
     - Stream processing
-    - Applcation configuration
+    - Application configuration
 
  2. Non blocking IO: We use an EventMachine reactor to asynchronously handle the incoming HTTP chunks. It is important that we not block on incoming data.
 
@@ -38,7 +28,7 @@ Some key notes about this design are as follows:
 To get the REPL running, run the following commands from the project directory
 ```bash
 bundle install
-ruby ./bin/thin_connector_runner.rb
+./start
 ```
 
 From there, you can type ```help``` to get a list of commands
