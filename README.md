@@ -5,6 +5,8 @@
 - [x] Mock Stream
 - [x] Add stream processor
 - [ ] Make README awesome!
+- [ ] Fix empty configuration on first run
+- [ ] Default redis/mongo yml files
 
 #Welcome to the Ruby Thin Connector!
 This is a sample app which connects to the Gnip set of streaming APIs in Ruby. The application is broken down into three basic elements:
@@ -40,3 +42,15 @@ ruby ./bin/thin_connector_runner.rb
 ```
 
 From there, you can type ```help``` to get a list of commands
+
+
+##Whats Next?
+Now that you can access the data, where do you go from here? The world is your
+oyster, and we can't wait to see what you do next. There are a few things to keep
+in mind however. Getting the data in the door is just the first step, proper storage
+of the data for purposes of keeping in compliance is important. The easiest
+way to achieve this is to make sure to keep record of both the individual Tweet ids
+and user ids, to facilitate removing tweets when necessary.
+
+##LICENCE
+Refer to the LICENCE file
