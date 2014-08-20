@@ -31,6 +31,10 @@ def commands
   }
 end
 
+def handle_needs_configuration(cmd=nil)
+  puts "#{cmd || 'This'} command required configuration. Please run 'configure'"
+end
+
 def help_msg
   <<-eos
     Welcome to the Ruby Thin Connector!
@@ -50,52 +54,113 @@ def repl_exit
   exit 0
 end
 
-def configure
-  config = {}
-  loop do
-    print 'Enter gnip username: '
-    config[:gnip_username] = gets
-    break unless config[:gnip_username].empty?
-    puts 'Username cannot be empty!'
-  end
-
-  loop do
-    print 'Enter gnip password: '
-    config[:gnip_password] = gets
-    break unless config[:gnip_password].empty?
-    puts 'cannot be empty!'
-  end
-
-  loop do
-    print 'Enter gnip url: '
-    config[:gnip_url] = gets
-    break unless config[:gnip_url].empty?
-    puts 'cannot be empty!'
-  end
-
-  print 'Enter debug level (fatal, error, info, debug): '
-  level = gets
-  config[:log_level] = level || 'debug'
-
-  env_config = {
-      test: config,
-      development: config,
-      production: config,
-      staging: config
-  }
-  write_out_config env_config
-  puts "Configuration: #{config.to_yaml}"
+def get_user_input(item_name)
+  print "Enter #{item_name}: "
+  input = gets.chomp
+  if non_alpha_numeric_string(input) then '' else input end
 end
 
-def write_out_config(config)
-  file = File.join File.dirname(__FILE__), '..', 'config', 'application.yml'
-  File.open(file, 'w+') do |f|
+
+def non_alpha_numeric_string(str)
+  0 == (str =~ /^\W+$/) || str.empty?
+end
+
+def get_non_null_user_input(item_name)
+  loop do
+    input = get_user_input item_name
+    if non_alpha_numeric_string(input)
+      puts "#{item_name} cannot be empty!"
+    else
+      return input
+    end
+  end
+end
+
+def get_user_input_with_default(item_name, default)
+  return get_user_input(item_name) unless default
+  print "Enter #{item_name} (defaults to #{default}): "
+  input = gets.chomp
+  if non_alpha_numeric_string(input) then default else input end
+end
+
+def configure_application
+  config = {}
+  config[:gnip_username] = get_non_null_user_input 'gnip username'
+  config[:gnip_password] = get_non_null_user_input 'gnip password'
+  config[:gnip_url] = get_non_null_user_input 'gnip url'
+  config[:log_level] = get_user_input_with_default 'debug level', 'debug'
+  p config
+  write_out_config application_configuration_path, environment_configuration(config)
+end
+
+def configure_redis
+  configs_with_defaults = {
+      host: '0.0.0.0',
+      port: 6379
+  }
+  user_configs = configs_with_defaults.inject({}) do  |acc, key_val_arr|
+    k, v = key_val_arr
+    user_input_with_default = get_user_input_with_default "Redis #{k}", v
+    acc[k] = user_input_with_default
+    acc
+  end
+  write_out_config redis_configuration_path, environment_configuration(user_configs)
+end
+
+def configure_mongo
+  config_with_defaults = {
+      host: '0.0.0.0',
+      database: 'thinConnectorProd',
+      username: nil,
+      password: nil
+  }
+  user_configs = config_with_defaults.inject({}) do  |acc, key_val_arr|
+    k, v = key_val_arr
+    user_input_with_default = get_user_input_with_default "Mongo #{k}", v
+    acc[k] = user_input_with_default
+    acc
+  end
+  write_out_config mongo_configuration_path, environment_configuration(user_configs)
+end
+
+def environment_configuration(user_configs)
+  %w(test development production staging).map{ |env| env.to_sym }.inject({})  do |acc, val|
+    acc[val] = user_configs
+    acc
+  end
+end
+
+def configure
+  configure_application
+  configure_redis
+  configure_mongo
+end
+
+def application_configuration_path
+  File.join File.dirname(__FILE__), '..', 'config', 'application.yml'
+end
+
+
+def redis_configuration_path
+  File.join File.dirname(__FILE__), '..', 'config', 'redis.yml'
+end
+
+def mongo_configuration_path
+  File.join File.dirname(__FILE__), '..', 'config', 'mongo.yml'
+end
+
+def write_out_config(path, config)
+  File.open(path, 'w+') do |f|
     f.truncate 0
     f << config.to_yaml
   end
 end
 
 def mongo_processor
+  if needs_configuration?
+    handle_needs_configuration 'Mongo'
+    return
+  end
   stream = setup_stream
   mongo_processor = ThinConnector::Processor::MongoStreamProcessor.new stream
   run_processor mongo_processor
@@ -106,16 +171,29 @@ def mongo_processor
 end
 
 def print_stream_processor
+  if needs_configuration?
+    handle_needs_configuration 'STDOUT'
+    return
+  end
   stream = setup_stream
   run_processor stream
   puts "\n\n\nWhew! That was a lot of JSON!"
 end
 
 def redis_processor
+  if needs_configuration?
+    handle_needs_configuration 'Redis'
+    return
+  end
   stream = setup_stream
   redis_processor = ThinConnector::Processor::RedisStreamProcessor.new stream
   redis = Redis.new ThinConnector::Environment.instance.redis_config
-  redis.flushall
+  begin
+    redis.flushall
+  rescue Redis::CannotConnectError
+    puts "\nWhoops! Looks like we could not connect to Redis with that configuration"
+    return
+  end
 
   run_processor(redis_processor)
 
@@ -161,6 +239,10 @@ def setup_stream
       'Accept-Encoding' => 'gzip,deflate,sdch'
   }
   ThinConnector::Stream::GNIPStream.new url, headers
+end
+
+def needs_configuration?
+  !(File.exist?(application_configuration_path) && File.exist?(redis_configuration_path ) && File.exist?(mongo_configuration_path))
 end
 
 ##################
