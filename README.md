@@ -4,9 +4,9 @@
 - [x] Add logging
 - [x] Mock Stream
 - [x] Add stream processor
-- [ ] Make README awesome!
-- [ ] Fix empty configuration on first run
-- [ ] Default redis/mongo yml files
+- [x] Make README awesome!
+- [x] Fix empty configuration on first run
+- [x] Default redis/mongo yml files
 
 #Welcome to the Ruby Thin Connector!
 This is a sample app which connects to the Gnip set of streaming APIs in Ruby. The application is broken down into three basic elements:
