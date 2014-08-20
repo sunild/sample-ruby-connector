@@ -70,7 +70,11 @@ module ThinConnector
     end
 
     def extract_account_name_from_uri(uri)
-      uri.match( /accounts\/[^\/]+/ )[0].split('/').last
+      begin
+        uri.match( /accounts\/[^\/]+/ )[0].split('/').last
+      rescue NoMethodError
+        raise "Error trying to parse URI: #{uri}"
+      end
     end
 
     def extract_stream_label_from_uri(uri)
