@@ -10,7 +10,7 @@ module ThinConnector
       end
 
       def reset_reconnect_time
-        @stream_reconnect_time = 0
+        @stream_reconnect_time = 1
       end
 
       def max_reconnect_time
