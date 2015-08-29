@@ -63,11 +63,9 @@ module ThinConnector
           http.stream { |chunk| process_chunk(chunk) }
           http.callback {
             handle_connection_close(http)
-            reconnect
           }
           http.errback {
             handle_error(http)
-            reconnect
           }
 
           EM.add_periodic_timer(3) do
